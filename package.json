@@ -1,0 +1,21 @@
+{
+  "name": "wr-workers",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "WellRead workers for populating book and author data",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "openai": "^4.68.2",
+    "pg": "^8.13.0",
+    "pg-format": "^1.0.4",
+    "uuid": "^10.0.0"
+  }
+}
