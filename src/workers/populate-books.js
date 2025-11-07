@@ -55,13 +55,7 @@ async function search(q, offset, limit) {
       doc.cover_edition_key || null,
       primaryAuthorName,
       'pending', // status
-      null, // description
-      null, // type
-      null, // genres
-      null, // summary
-      null, // key_points
       pictureUrl, // picture_url
-      null, // similar_books
       doc.first_publish_year || null,
       doc.readinglog_count || 0,
     ]);
@@ -69,10 +63,9 @@ async function search(q, offset, limit) {
 
   if (bookInserts.length > 0) {
     await db.query(format(`
-      INSERT INTO wellread.book (
+      INSERT INTO book.book (
         id, created_at, updated_at, url, alias, title, cover_edition_key, 
-        primary_author_name, status, description, type, genres, summary, 
-        key_points, picture_url, similar_books, first_publish_year, readinglog_count
+        primary_author_name, status, picture_url, first_publish_year, readinglog_count
       ) 
       VALUES %L
       ON CONFLICT (id) DO NOTHING
@@ -86,7 +79,7 @@ async function search(q, offset, limit) {
 async function main() {
   try {
     const { count } = await db.queryOne(`
-      SELECT COUNT(1) AS count FROM wellread.book
+      SELECT COUNT(1) AS count FROM book.book
     `);
     console.log(`Starting from offset ${count}`);
     
