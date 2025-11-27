@@ -3,7 +3,7 @@ import format from 'pg-format';
 import db from '../libs/db.js';
 import { ask } from '../libs/llm.js';
 import axios from 'axios';
-import { v5 } from 'uuid';
+import { v5, v4 as uuidv4 } from 'uuid';
 
 /*
   This worker enriches books in book.book where status IS NULL or status='pending'.
@@ -20,7 +20,7 @@ const COVER_BASE = 'https://covers.openlibrary.org/b/olid';
 
 function buildPrompt({ title, author, existingDescription }) {
   return `
-    You are an expert literary summarization assistant.
+    You are an expert literary analysis assistant with deep knowledge of books across all genres.
     Given the following book title and author, produce a JSON object strictly matching this TypeScript interface:
 
     interface BookEnrichment {
@@ -33,17 +33,50 @@ function buildPrompt({ title, author, existingDescription }) {
         author?: string;
         page_number?: number;
       }[]; // 5-10 memorable quotations, each < 180 characters
+      enjoyment_criteria: string[]; // 3-5 "You'd enjoy this book if..." bullet points
+      actionable_benefits: string[]; // 3-5 "This book can help you..." practical benefits
+      contrasting_viewpoints: string[]; // 1-2 points of criticism or opposing perspectives
+      actionable_steps: string[]; // 2-3 simple tasks/exercises for immediate application
+      major_themes: {
+        title: string; // Theme name (e.g., "The Power of Vulnerability")
+        explanation: string; // 120-200 word explanation of this theme
+      }[]; // 3-5 major themes with detailed explanations
     }
 
     Rules:
     - If you are NOT reasonably confident about the content, respond with {"status":"UNFAMILIAR"} only.
     - For summary_pages: divide the content into 5-6 coherent sections that flow naturally
     - Each summary page should be self-contained but connect logically to the next
-    - Do NOT include markdown
+    - For enjoyment_criteria: focus on reader personalities, interests, or situations
+    - For actionable_benefits: be specific about real-world applications and outcomes
+    - For contrasting_viewpoints: include legitimate criticisms or alternative perspectives
+    - For actionable_steps: provide concrete, doable tasks readers can try immediately
+    - For major_themes: go deeper than key_points - provide nuanced analysis
+    - Do NOT include markdown formatting
     - Do NOT add commentary outside JSON
     - Keep genres high-level (e.g., "Psychology", "Leadership", "Fantasy")
-    - For quotes, include author attribution and page numbers when confident
-    - Do not use placeholder text
+    - For quotes, include attribution and page numbers when confident
+    - Do not use placeholder text or generic statements
+
+    Examples for clarity:
+    
+    Enjoyment criteria examples:
+    - "You enjoy introspective narratives that challenge conventional thinking"
+    - "You're interested in practical frameworks for decision-making"
+    - "You appreciate stories that blend historical facts with compelling character development"
+    
+    Actionable benefits examples:
+    - "Develop a systematic approach to evaluating investment opportunities"
+    - "Build stronger relationships through improved emotional intelligence"
+    - "Create more effective daily routines using proven productivity principles"
+    
+    Contrasting viewpoints examples:
+    - "Critics argue the author oversimplifies complex psychological phenomena"
+    - "Some economists dispute the book's assumptions about market behavior"
+    
+    Actionable steps examples:
+    - "Practice the 5-minute morning reflection exercise described in Chapter 3"
+    - "Implement the author's decision-making framework on your next project choice"
 
     Book:
     Title: "${title}"
@@ -95,6 +128,7 @@ async function enrichOne() {
     ORDER BY readinglog_count DESC NULLS LAST
     LIMIT 1
   `);
+
   if (!book) {
     return false;
   }
@@ -111,7 +145,7 @@ async function enrichOne() {
 
   let llm;
   try {
-    llm = await ask(prompt, undefined, 'book-enrich');
+    llm = await ask(prompt, 'gpt-4o-mini', 'book-enrich');
   } catch (err) {
     console.error('LLM error:', err.message);
     await db.query('UPDATE book.book SET status = $2 WHERE id = $1', [book.id, 'ERROR_LLM']);
@@ -123,7 +157,8 @@ async function enrichOne() {
     await db.query('UPDATE book.book SET status = $2 WHERE id = $1', [book.id, 'SKIPPED']);
     return true;
   }
-  try{
+
+  try {
     // Handle genres
     const genreIds = await ensureGenres(llm.genres);
     if (genreIds.length) {
@@ -134,6 +169,7 @@ async function enrichOne() {
         )
       );
     }
+
     // Handle summary pages
     if (llm.summary_pages?.length) {
       const summaryValues = llm.summary_pages.map((content, i) => [
@@ -155,6 +191,7 @@ async function enrichOne() {
       const keyPointValues = llm.key_points.map((point, i) => [
         book.id, point, i + 1
       ]);
+      await db.query('DELETE FROM book.key_point WHERE book_id = $1', [book.id]);
       await db.query(
         format('INSERT INTO book.key_point (book_id, point, order_index) VALUES %L',
           keyPointValues
@@ -171,11 +208,85 @@ async function enrichOne() {
         quote.page_number || null,
         i + 1
       ]);
+      await db.query('DELETE FROM book.quote WHERE book_id = $1', [book.id]);
       await db.query(
         format('INSERT INTO book.quote (book_id, text, author, page_number, order_index) VALUES %L',
           quoteValues
         )
       );
+    }
+
+    // NEW: Handle enjoyment criteria
+    if (llm.enjoyment_criteria?.length) {
+      const enjoymentValues = llm.enjoyment_criteria.map((criteria, i) => [
+        book.id, criteria, i + 1
+      ]);
+      await db.query('DELETE FROM book.enjoyment_criteria WHERE book_id = $1', [book.id]);
+      await db.query(
+        format('INSERT INTO book.enjoyment_criteria (book_id, criteria, order_index) VALUES %L',
+          enjoymentValues
+        )
+      );
+    }
+
+    // NEW: Handle actionable benefits
+    if (llm.actionable_benefits?.length) {
+      const benefitValues = llm.actionable_benefits.map((benefit, i) => [
+        book.id, benefit, i + 1
+      ]);
+      await db.query('DELETE FROM book.actionable_benefit WHERE book_id = $1', [book.id]);
+      await db.query(
+        format('INSERT INTO book.actionable_benefit (book_id, benefit, order_index) VALUES %L',
+          benefitValues
+        )
+      );
+    }
+
+    // NEW: Handle contrasting viewpoints
+    if (llm.contrasting_viewpoints?.length) {
+      const viewpointValues = llm.contrasting_viewpoints.map((viewpoint, i) => [
+        book.id, viewpoint, i + 1
+      ]);
+      await db.query('DELETE FROM book.contrasting_viewpoint WHERE book_id = $1', [book.id]);
+      await db.query(
+        format('INSERT INTO book.contrasting_viewpoint (book_id, viewpoint, order_index) VALUES %L',
+          viewpointValues
+        )
+      );
+    }
+
+    // NEW: Handle actionable steps
+    if (llm.actionable_steps?.length) {
+      const stepValues = llm.actionable_steps.map((step, i) => [
+        book.id, step, i + 1
+      ]);
+      await db.query('DELETE FROM book.actionable_step WHERE book_id = $1', [book.id]);
+      await db.query(
+        format('INSERT INTO book.actionable_step (book_id, step, order_index) VALUES %L',
+          stepValues
+        )
+      );
+    }
+
+    // NEW: Handle major themes
+    for (const theme of llm.major_themes || []) {
+      const themeId = uuidv4();
+      await db.query(`
+        INSERT INTO book.book_theme(
+          id,
+          book_id,
+          title,
+          description,
+          status
+        )
+        VALUES ($1, $2, $3, $4, $5)
+      `, [
+        themeId,
+        book.id,
+        theme.title,
+        theme.description,
+        llm.status,
+      ]);
     }
 
     // Update book status
@@ -194,6 +305,7 @@ async function enrichOne() {
       pictureUrl,
       llm.status
     ]);
+    
     console.log('✓ Enriched successfully');
   } catch (err) {
     console.error('DB error:', err.message);
