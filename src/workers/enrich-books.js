@@ -21,13 +21,14 @@ const COVER_BASE = 'https://covers.openlibrary.org/b/olid';
 function buildPrompt({ title, author, existingDescription }) {
   return `
     You are an expert literary analysis assistant with deep knowledge of books across all genres.
-    Given the following book title and author, produce a JSON object strictly matching this TypeScript interface:
+    Given the following book title and author, 
+    produce a JSON object strictly matching this TypeScript interface:
 
     interface BookEnrichment {
       status: 'FICTION' | 'NON-FICTION';
       genres: string[]; // 2-3 concise genre labels
-      summary_pages: string[]; // 5-6 pages of summary, each ~180-240 words (3 min read each)
-      key_points: string[]; // 5-7 pivotal ideas, themes, or takeaways
+      summary_pages: string[]; // 5-6 pages of summary, each ~500 words
+      key_points: string[]; // 5-7 pivotal ideas or takeaways
       quotes: {
         text: string;
         author?: string;
@@ -45,18 +46,20 @@ function buildPrompt({ title, author, existingDescription }) {
 
     Rules:
     - If you are NOT reasonably confident about the content, respond with {"status":"UNFAMILIAR"} only.
-    - For summary_pages: divide the content into 5-6 coherent sections that flow naturally
-    - Each summary page should be self-contained but connect logically to the next
-    - For enjoyment_criteria: focus on reader personalities, interests, or situations
-    - For actionable_benefits: be specific about real-world applications and outcomes
-    - For contrasting_viewpoints: include legitimate criticisms or alternative perspectives
-    - For actionable_steps: provide concrete, doable tasks readers can try immediately
-    - For major_themes: go deeper than key_points - provide nuanced analysis
-    - Do NOT include markdown formatting
-    - Do NOT add commentary outside JSON
-    - Keep genres high-level (e.g., "Psychology", "Leadership", "Fantasy")
-    - For quotes, include attribution and page numbers when confident
-    - Do not use placeholder text or generic statements
+    - For summary_pages: divide the content into 5-6 coherent sections that flow naturally.
+    - Each summary page should be self-contained but connect logically to the next.
+    - Each summary page content should be divided into paragraphs for readability.
+    - For enjoyment_criteria: focus on reader personalities, interests, or situations.
+    - For key_points: use single, impactful sentences that capture the essence of each point.
+    - For actionable_benefits: be specific about real-world applications and outcomes.
+    - For contrasting_viewpoints: include legitimate criticisms or alternative perspectives.
+    - For actionable_steps: provide concrete, doable tasks readers can try immediately.
+    - For major_themes: go deeper than key_points - provide nuanced analysis.
+    - Do NOT include markdown formatting.
+    - Do NOT add commentary outside JSON.
+    - Keep genres high-level (e.g., "Psychology", "Leadership", "Fantasy").
+    - Do not use placeholder text or generic statements.
+    - Do NOT add page number in the summary pages.
 
     Examples for clarity:
     
@@ -145,7 +148,7 @@ async function enrichOne() {
 
   let llm;
   try {
-    llm = await ask(prompt, 'gpt-4o-mini', 'book-enrich');
+    llm = await ask(prompt, 'gpt-5-mini', 'book-enrich', {reasoningEffort: 'high' });
   } catch (err) {
     console.error('LLM error:', err.message);
     await db.query('UPDATE book.book SET status = $2 WHERE id = $1', [book.id, 'ERROR_LLM']);
@@ -314,8 +317,8 @@ async function enrichOne() {
 
   return true;
 }
-enrichOne();
-/*async function loop() {
+
+async function loop() {
   while (true) {
     const processed = await enrichOne();
     if (!processed) {
@@ -327,4 +330,4 @@ enrichOne();
   }
 }
 
-export { loop as enrichBooks };*/
+export { loop as enrichBooks };
