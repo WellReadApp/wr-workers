@@ -21,45 +21,42 @@ const COVER_BASE = 'https://covers.openlibrary.org/b/olid';
 function buildPrompt({ title, author, existingDescription }) {
   return `
     You are an expert literary analysis assistant with deep knowledge of books across all genres.
-    Given the following book title and author, 
-    produce a JSON object strictly matching this TypeScript interface:
+    I would like you to give me a structured information of a book based on it's title, author and an existing description.
+    
+    Book:
+    Title: "${title}"
+    Author: "${author || 'Unknown'}"
+    Existing description: "${existingDescription || ''}"
+
+    If you are NOT FAMILIAR with this book respond with the following JSON:
+      {
+        "status": "UNFAMILIAR"
+      }
+
+    Otherwise, your sole task is to produce a JSON object that matches the interface below, 
+    with no extra text.
 
     interface BookEnrichment {
       status: 'FICTION' | 'NON-FICTION';
-      genres: string[]; // 2-3 concise genre labels
-      summary_pages: string[]; // 5-6 pages of summary, each ~500 words
-      key_points: string[]; // 5-7 pivotal ideas or takeaways
+      genres: string[]; // A list of 2-3 genres that best describe the book
+      summary_pages: string[]; // A brief summary of book divided into a list of 5-6 pages of summary, 
+      // each page containing ~500 words, divided into paragraphs for readability
+      key_points: string[]; // A list of 5-7 key pivotal ideas from the book
       quotes: {
         text: string;
         author?: string;
-        page_number?: number;
-      }[]; // 5-10 memorable quotations, each < 180 characters
-      enjoyment_criteria: string[]; // 3-5 "You'd enjoy this book if..." bullet points
-      actionable_benefits: string[]; // 3-5 "This book can help you..." practical benefits
-      contrasting_viewpoints: string[]; // 1-2 points of criticism or opposing perspectives
-      actionable_steps: string[]; // 2-3 simple tasks/exercises for immediate application
+      }[]; // A list of 5-10 memorable quotations from the book, each < 180 characters
+      enjoyment_criteria: string[]; // A list of 3-5 bullet points which describe the type of reader who would particularly enjoy this book
+      // and complete the sentence "You'd enjoy this book if...". Each point should start with "You"
+      actionable_benefits: string[]; // A list of 3-5 specific ways this book can help a reader. 
+      // Each should start with an imperative verb and complete the sentence "This book can help you..." with practical benefits
+      contrasting_viewpoints: string[]; // A list of 1-2 points of criticism or opposing perspectives
+      actionable_steps: string[]; // A list of 2-3 simple tasks/exercises for immediate application
       major_themes: {
-        title: string; // Theme name (e.g., "The Power of Vulnerability")
-        explanation: string; // 120-200 word explanation of this theme
-      }[]; // 3-5 major themes with detailed explanations
+        title: string; // A title for the book theme
+        explanation: string; // A brief description of the book theme
+      }[]; // A list of 3-5 major themes with detailed explanations
     }
-
-    Rules:
-    - If you are NOT reasonably confident about the content, respond with {"status":"UNFAMILIAR"} only.
-    - For summary_pages: divide the content into 5-6 coherent sections that flow naturally.
-    - Each summary page should be self-contained but connect logically to the next.
-    - Each summary page content should be divided into paragraphs for readability.
-    - For enjoyment_criteria: focus on reader personalities, interests, or situations.
-    - For key_points: use single, impactful sentences that capture the essence of each point.
-    - For actionable_benefits: be specific about real-world applications and outcomes.
-    - For contrasting_viewpoints: include legitimate criticisms or alternative perspectives.
-    - For actionable_steps: provide concrete, doable tasks readers can try immediately.
-    - For major_themes: go deeper than key_points - provide nuanced analysis.
-    - Do NOT include markdown formatting.
-    - Do NOT add commentary outside JSON.
-    - Keep genres high-level (e.g., "Psychology", "Leadership", "Fantasy").
-    - Do not use placeholder text or generic statements.
-    - Do NOT add page number in the summary pages.
 
     Examples for clarity:
     
@@ -81,10 +78,18 @@ function buildPrompt({ title, author, existingDescription }) {
     - "Practice the 5-minute morning reflection exercise described in Chapter 3"
     - "Implement the author's decision-making framework on your next project choice"
 
-    Book:
-    Title: "${title}"
-    Author: "${author || 'Unknown'}"
-    Existing description: "${existingDescription || ''}"
+    Rules:
+    - If you are NOT reasonably confident about the content, respond with {"status":"UNFAMILIAR"} only.
+    - For summary_pages: Each summary page should be self-contained but connect logically to the next.
+    - For enjoyment_criteria: focus on reader personalities, interests, or situations.
+    - For key_points: use single, impactful sentences that capture the essence of each point.
+    - For actionable_benefits: be specific about real-world applications and outcomes.
+    - For contrasting_viewpoints: include legitimate criticisms or alternative perspectives.
+    - For actionable_steps: provide concrete, doable tasks readers can try immediately.
+    - Do NOT include markdown formatting.
+    - Do NOT add commentary outside JSON.
+    - Keep genres high-level (e.g., "Psychology", "Leadership", "Fantasy").
+    - Do not use placeholder text or generic statements.
   `;
 }
 
@@ -148,7 +153,7 @@ async function enrichOne() {
 
   let llm;
   try {
-    llm = await ask(prompt, 'gpt-5-mini', 'book-enrich', {reasoningEffort: 'high' });
+    llm = await ask(prompt, 'gpt-5.1', 'book-enrich');
   } catch (err) {
     console.error('LLM error:', err.message);
     await db.query('UPDATE book.book SET status = $2 WHERE id = $1', [book.id, 'ERROR_LLM']);
