@@ -1,0 +1,112 @@
+{
+  "book": {
+    "id": "3a5c73dc-b26a-5db4-b6f3-7bf3045331a5",
+    "title": "The Power of Your Subconscious Mind",
+    "author": "Joseph Murphy"
+  },
+  "config": {
+    "model": "gpt-5-nano",
+    "reasoningEffort": "minimal"
+  },
+  "timestamp": "2025-12-11T02:19:10.428Z",
+  "llmOutput": {
+    "status": "NON-FICTION",
+    "genres": [
+      "Psychology",
+      "Self-help",
+      "Personal Development"
+    ],
+    "summary_pages": [
+      "The Power of Your Subconscious Mind presents a premise in which the mind is a dynamic, two-tier system: the conscious mind, which makes choices and forms plans, and the subconscious mind, which acts as a powerful, automatic engine that shapes life in accordance with the beliefs, habits, and emotional patterns stored within it. Murphy argues that many of our life circumstances—health, wealth, relationships, and creativity—are ultimately driven by the subconscious, often operating beneath the level of ordinary awareness. In this opening exploration, the author lays out the core idea that changing your external world begins with changing the internal imagery, beliefs, and feelings you sow in the mind. The revised edition expands on techniques to direct mental energy toward constructive outcomes, emphasizing that science-like laws govern thought and that deliberate practice can yield tangible reports from daily life. The pages connect the reader to a long tradition of mental science, while offering a practical, step-by-step approach for applying these principles to everyday problems.",
+      "A central technique discussed is autosuggestion: the practice of feeding the subconscious with repeated, emotionally charged statements presented in the present tense. Murphy emphasizes that repetition matters, but the quality of feeling behind the words matters even more; belief must accompany the words for the suggestion to take root. The book guides readers through crafting concise affirmations aligned with specific goals—health, success, or healing—and then repeating them in relaxed states, such as upon waking or before sleep. Visualization is introduced as a companion to autosuggestion: creating vivid, multisensory mental pictures of desired outcomes helps to solidify the mental equivalent of success in the subconscious. The narrative stresses consistency: small, daily rituals accumulate over time and create real changes in perception, attitude, and circumstance. The pages outline examples and templates to help readers build their own practice rather than merely reading about it.",
+      "The text expands on the notion of the 'mental equivalent'—the idea that the subconscious seeks to manifest in outer life what is held as an inner image and belief. Murphy offers guidance on how to construct mental pictures that resemble the future you wish to inhabit, paying attention to sensory detail, timing, and emotional intensity. He also discusses the health implications of subconscious programming, suggesting that lingering fear, worry, or chronic negative beliefs can undermine physical well-being, while confidence, serenity, and positive intention can contribute to healing. The author connects creative cognition with practical outcomes, proposing that consistent mental rehearsal can enhance problem solving, spark original ideas, and unlock latent talents. Readers are encouraged to test hypotheses in their own lives by observing correlations between inner states and outer results, then refining techniques to suit personal temperament and goals.",
+      "Murphy also addresses the social and ethical dimensions of subconscious power. He cautions readers against magical thinking or ignoring real-world effort, arguing that the subconscious supports purposeful action rather than replacing it. The revised edition invites a broader reflection on how beliefs influence relationships, career progress, and overall mood, while presenting safeguards—such as avoiding self-delusion, maintaining grounded expectations, and practicing discernment—to prevent misuse. The book situates mental practice within a broader discipline of self-mederal responsibility, arguing that personal growth requires both inner work and steady, constructive behavior in the external world. By balancing imagination with discipline, the text presents a holistic program for cultivating a healthier, more creative, and productive life.",
+      "In closing, the work offers a practical toolkit rather than a theoretical manifesto: a set of tasks, exercises, and routines designed to be integrated into daily life. Readers are urged to begin with small, manageable goals, gradually increasing complexity and scope as confidence grows. The final pages reinforce the idea that the subconscious responds to repeated, deliberate, and emotionally charged intent and that consistent practice can rewire patterns that have persisted for years. By combining affirmations, visualization, and thoughtful action, the book argues that individuals can align their inner landscapes with desired outer outcomes, painting a new mental map that guides decisions, behaviors, and opportunities toward fulfillment."
+    ],
+    "key_points": [
+      "The subconscious mind is a responsive engine that shapes life based on cultivated beliefs, images, and emotions.",
+      "Autosuggestion, especially when paired with strong feeling, can rewrite old patterns and create new realities.",
+      "Visualization and mental rehearsal ground intentions in sensory detail, making desired outcomes feel real.",
+      "Mental power works best when thought, feeling, and action are aligned toward clear goals in the present tense.",
+      "Health, wealth, and relationships can improve as inner images and beliefs shift, prompting supportive external changes.",
+      "Consistency and ethical use of mind power are crucial; never substitute action with wishful thinking."
+    ],
+    "quotes": [
+      {
+        "text": "Change your thoughts and you change your destiny.",
+        "author": "Joseph Murphy"
+      },
+      {
+        "text": "The subconscious acts on the images you hold in your mind.",
+        "author": "Joseph Murphy"
+      },
+      {
+        "text": "Think of your goal in the present tense and feel its truth now.",
+        "author": "Joseph Murphy"
+      },
+      {
+        "text": "Affirmations work when spoken with feeling and belief.",
+        "author": "Joseph Murphy"
+      },
+      {
+        "text": "Visualization is mental rehearsal for real-life success.",
+        "author": "Joseph Murphy"
+      },
+      {
+        "text": "Your mind accepts as true whatever you hold before it.",
+        "author": "Joseph Murphy"
+      },
+      {
+        "text": "Every persistent thought becomes a habit that shapes your life.",
+        "author": "Joseph Murphy"
+      },
+      {
+        "text": "Move from wishful thinking to purposeful inner practice.",
+        "author": "Joseph Murphy"
+      }
+    ],
+    "enjoyment_criteria": [
+      "You enjoy practical frameworks for personal development grounded in psychology and self-discipline.",
+      "You are drawn to techniques that combine daily ritual, imagination, and emotional engagement.",
+      "You appreciate a historically influential approach to mind–body health and creativity."
+    ],
+    "actionable_benefits": [
+      "Apply daily affirmations to reframe your thinking, This book can help you change habitual beliefs and improve outcomes.",
+      "Practice focused visualization to reinforce desired outcomes, This book can help you build mental clarity and motivation.",
+      "Establish a simple morning/evening routine of repetition and breathing, This book can help you create consistency and reduce stress.",
+      "Create a concise 'mental equivalent' script for goals, This book can help you align actions with intentions.",
+      "Use immediate, concrete actions alongside inner practice to accelerate progress, This book can help you translate intention into results."
+    ],
+    "contrasting_viewpoints": [
+      "Critics argue that Murphy overemphasizes the power of the subconscious and underestimates structural or external constraints.",
+      "Some readers and scholars caution that the approach risks encouraging simplistic causation between thought and life outcomes without rigorous empirical support."
+    ],
+    "actionable_steps": [
+      "Choose a specific goal and craft a 1-2 sentence present-tense affirmation.",
+      "Spend 5 minutes in a relaxed state to repeat the affirmation with emotion.",
+      "Before sleep, visualize a detailed scene where the goal is already achieved."
+    ],
+    "major_themes": [
+      {
+        "title": "Subconscious as Creative Engine",
+        "explanation": "The book positions the subconscious as a powerful generator of patterns that shape reality, activated by belief, emotion, and intention."
+      },
+      {
+        "title": "Autosuggestion and Belief Formation",
+        "explanation": "Repeated, emotionally charged statements entrain the subconscious, gradually replacing limiting beliefs with constructive ones."
+      },
+      {
+        "title": "Visualization and Mental Imagery",
+        "explanation": "Mental rehearsal with vivid sensory details accelerates the alignment between inner images and outer results."
+      },
+      {
+        "title": "Mind–Body Connection and Healing",
+        "explanation": "Thought patterns influence health and well-being, suggesting a pathway from mental state to physical condition."
+      },
+      {
+        "title": "Ethical and Practical Use of Mental Power",
+        "explanation": "Inner power is paired with deliberate action and responsibility; inner practice should be matched by real-world effort."
+      }
+    ]
+  }
+}

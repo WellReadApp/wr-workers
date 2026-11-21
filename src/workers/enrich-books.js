@@ -4,6 +4,8 @@ import db from '../libs/db.js';
 import { ask } from '../libs/llm.js';
 import axios from 'axios';
 import { v5, v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+import path from 'path';
 
 /*
   This worker enriches books in book.book where status IS NULL or status='pending'.
@@ -15,6 +17,12 @@ import { v5, v4 as uuidv4 } from 'uuid';
     - genres (2-3) if empty
   Then updates the book row setting status='ENRICHED'.
 */
+
+// LLM Configuration - Change these to test different models and reasoning efforts
+const LLM_CONFIG = {
+  model: 'gpt-5-nano',  // Options: 'gpt-5-nano', 'gpt-4o-mini', 'o1-mini', etc.
+  reasoningEffort: 'minimalw'  // Options: 'low', 'medium', 'high' (only works for o1/o3 models)
+};
 
 const COVER_BASE = 'https://covers.openlibrary.org/b/olid';
 
@@ -132,7 +140,7 @@ async function enrichOne() {
   const book = await db.queryOne(`
     SELECT id, alias, title, primary_author_name, description, cover_edition_key
     FROM book.book
-    WHERE (status IS NULL OR status = 'pending')
+    WHERE status = 'test'
     ORDER BY readinglog_count DESC NULLS LAST
     LIMIT 1
   `);
@@ -153,19 +161,54 @@ async function enrichOne() {
 
   let llm;
   try {
-    llm = await ask(prompt, 'gpt-5.1', 'book-enrich');
+    llm = await ask(prompt, LLM_CONFIG.model, 'book-enrich', { 
+      reasoningEffort: LLM_CONFIG.reasoningEffort 
+    });
   } catch (err) {
     console.error('LLM error:', err.message);
-    await db.query('UPDATE book.book SET status = $2 WHERE id = $1', [book.id, 'ERROR_LLM']);
+    // await db.query('UPDATE book.book SET status = $2 WHERE id = $1', [book.id, 'ERROR_LLM']);
     return true;
   }
 
   if (llm.status === 'UNFAMILIAR') {
     console.log('Skipped (unfamiliar)');
-    await db.query('UPDATE book.book SET status = $2 WHERE id = $1', [book.id, 'SKIPPED']);
+    // await db.query('UPDATE book.book SET status = $2 WHERE id = $1', [book.id, 'SKIPPED']);
     return true;
   }
 
+  // Save LLM output to JSON file for comparison
+  const sanitizedTitle = book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0, 50);
+  const fileName = `${sanitizedTitle}-${LLM_CONFIG.model}-${LLM_CONFIG.reasoningEffort}.json`;
+  const outputDir = path.join(process.cwd(), 'llm-outputs');
+  
+  // Create output directory if it doesn't exist
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+  
+  const outputPath = path.join(outputDir, fileName);
+  const outputData = {
+    book: {
+      id: book.id,
+      title: book.title,
+      author: book.primary_author_name,
+    },
+    config: {
+      model: LLM_CONFIG.model,
+      reasoningEffort: LLM_CONFIG.reasoningEffort,
+    },
+    timestamp: new Date().toISOString(),
+    llmOutput: llm,
+  };
+  
+  fs.writeFileSync(outputPath, JSON.stringify(outputData, null, 2));
+  console.log(`✓ Saved output to: ${fileName}`);
+
+  // Mark book as enriched to avoid reprocessing
+  await db.query('UPDATE book.book SET status = $2 WHERE id = $1', [book.id, 'ENRICHED']);
+  console.log('✓ Book status updated to ENRICHED');
+
+  /* COMMENTED OUT - Database updates disabled for comparison testing
   try {
     // Handle genres
     const genreIds = await ensureGenres(llm.genres);
@@ -319,6 +362,7 @@ async function enrichOne() {
     console.error('DB error:', err.message);
     await db.query('UPDATE book.book SET status = $2, error_message = $3 WHERE id = $1', [book.id, 'ERROR_DB', err.message]);
   }
+  */
 
   return true;
 }
